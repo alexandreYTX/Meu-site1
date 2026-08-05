@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sala Escura — Prompts para fotos e vídeos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14120f;
+    --panel: #1f1a14;
+    --border: #37302a;
+    --border-soft: #2a251f;
+    --amber: #e8a33d;
+    --amber-dim: #a97a37;
+    --safelight: #c25a2c;
+    --text: #f4eee1;
+    --text-muted: #a89d8c;
+    --text-faint: #6f6656;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: radial-gradient(ellipse 120% 80% at 50% -10%, #221b13 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 5rem;
+  }
+
+  ::selection { background: var(--amber); color: #14120f; }
+
+  /* Header */
+  .header {
+    position: relative;
+    padding: 3.5rem 1.5rem 2.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-soft);
+    overflow: hidden;
+  }
+
+  .header::before, .header::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 22px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      #000 0px, #000 10px,
+      transparent 10px, transparent 24px
+    );
+    background-color: #0b0a08;
+    opacity: 0.9;
+  }
+  .header::before { top: 0; }
+  .header::after { bottom: 0; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 1.1rem;
+  }
+
+  .title {
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .title em {
+    font-style: italic;
+    color: var(--amber);
+  }
+
+  .subtitle {
+    margin: 1.1rem auto 0;
+    max-width: 40rem;
+    color: var(--text-muted);
+    font-size: 1.02rem;
+    line-height: 1.6;
+  }
+
+  /* Controls */
+  .controls {
+    max-width: 74rem;
+    margin: 2.5rem auto 0;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .search-wrap {
+    position: relative;
+    max-width: 30rem;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+    width: 17px;
+    height: 17px;
+    pointer-events: none;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.72rem 2.5rem 0.72rem 2.5rem;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .search-wrap input::placeholder { color: var(--text-faint); }
+  .search-wrap input:focus { border-color: var(--amber-dim); }
+
+  .search-wrap .clear-btn {
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    padding: 0.2rem;
+    display: none;
+    line-height: 0;
+  }
+  .search-wrap .clear-btn:hover { color: var(--text); }
+  .search-wrap .clear-btn svg { position: static; width: 15px; height: 15px; }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.48rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .chip svg { width: 14px; height: 14px; }
+
+  .chip:hover {
+    border-color: var(--amber-dim);
+    color: var(--text);
+  }
+
+  .chip.active {
+    background: linear-gradient(180deg, var(--amber) 0%, #ca8a35 100%);
+    border-color: var(--amber);
+    color: #1c1508;
+    font-weight: 600;
+  }
+
+  .count-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--text-faint);
+    letter-spacing: 0.02em;
+  }
+
+  /* Grid */
+  .grid {
+    max-width: 74rem;
+    margin: 2rem auto 0;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.4rem;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border-soft);
+    border-radius: 3px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.18s ease, transform 0.18s ease;
+  }
+
+  .card:hover {
+    border-color: var(--amber-dim);
+    transform: translateY(-2px);
+  }
+
+  .sprockets {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.7rem;
+    background: #0e0c09;
+  }
+
+  .sprockets span {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: #2b2620;
+  }
+
+  .card-body {
+    padding: 1.1rem 1.3rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 1;
+  }
+
+  .card-cat {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--safelight);
+  }
+
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 1.18rem;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .card-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    flex: 1;
+    margin: 0;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.3rem;
+  }
+
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .copy-btn svg { width: 14px; height: 14px; }
+
+  .copy-btn:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  .copy-btn.copied {
+    border-color: #6fae6f;
+    color: #8fca8f;
+  }
+
+  .empty {
+    max-width: 74rem;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+    text-align: center;
+    color: var(--text-faint);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.88rem;
+    display: none;
+  }
+
+  .footer-note {
+    max-width: 74rem;
+    margin: 3.5rem auto 0;
+    padding: 1.6rem 1.5rem 0;
+    border-top: 1px solid var(--border-soft);
+    color: var(--text-faint);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="eyebrow">laboratório de prompts</div>
+  <h1 class="title">Sala <em>Escura</em></h1>
+  <p class="subtitle">
+    Uma coleção de prompts prontos para melhorar fotos e vídeos com ferramentas de IA:
+    nitidez, luz, cor, restauro, retrato e color grading. Escolha, copie e cole na sua
+    ferramenta preferida.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <input id="searchInput" type="text" placeholder="Buscar por palavra-chave, ex: sombra, ruído, cor...">
+    <button class="clear-btn" id="clearBtn" aria-label="Limpar busca">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="count-line" id="countLine"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+<div class="empty" id="emptyMsg">Nenhum prompt encontrado. Tente outra palavra-chave ou categoria.</div>
+
+<div class="footer-note">
+  Dica: adapte os prompts ao vocabulário da sua ferramenta (Photoshop AI, Topaz, Magnific,
+  Runway, Luma etc.) — a estrutura de instrução funciona bem na maioria dos editores
+  baseados em IA.
+</div>
+
+<script>
+  const ICONS = {
+    qualidade: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.9L19 9.8l-4.1 3.2L16 19l-4-3-4 3 1.1-6-4.1-3.2 5.1-1.9L12 3z"></path></svg>',
+    luz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="4.9" y1="4.9" x2="6.3" y2="6.3"></line><line x1="17.7" y1="17.7" x2="19.1" y2="19.1"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.9" y1="19.1" x2="6.3" y2="17.7"></line><line x1="17.7" y1="6.3" x2="19.1" y2="4.9"></line></svg>',
+    cor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"></circle><circle cx="17.5" cy="10.5" r=".5"></circle><circle cx="8.5" cy="7.5" r=".5"></circle><circle cx="6.5" cy="12.5" r=".5"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.2-.3-.4-.6-.4-1 0-.8.7-1.4 1.5-1.4H16c3.3 0 6-2.7 6-6 0-4.9-4.5-9-10-9z"></path></svg>',
+    retrato: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg>',
+    restauro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>',
+    video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>',
+    grading: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>',
+    composicao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
+    realismo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="14.31" y1="8" x2="20.05" y2="17.94"></line><line x1="9.69" y1="8" x2="21.17" y2="8"></line><line x1="7.38" y1="12" x2="13.12" y2="2.06"></line><line x1="9.69" y1="16" x2="3.95" y2="6.06"></line><line x1="14.31" y1="16" x2="2.83" y2="16"></line><line x1="16.62" y1="12" x2="10.88" y2="21.94"></line></svg>',
+    combinacao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+  };
+
+  const CATEGORIES = [
+    { id: "qualidade", label: "Qualidade e nitidez" },
+    { id: "luz", label: "Luz e exposição" },
+    { id: "cor", label: "Cor e tom" },
+    { id: "retrato", label: "Retrato e pele" },
+    { id: "restauro", label: "Restauro de fotos antigas" },
+    { id: "video", label: "Vídeo: qualidade" },
+    { id: "grading", label: "Vídeo: grading cinematográfico" },
+    { id: "composicao", label: "Fundo e composição" },
+    { id: "realismo", label: "Realismo: tirar a cara de IA" },
+    { id: "combinacao", label: "Pessoa que combina com você" },
+  ];
+
+  const PROMPTS = [
+    { cat: "qualidade", title: "Upscale preservando textura", text: "Aumente a resolução desta imagem em 4x, preservando texturas naturais de pele, tecido e cabelo. Evite suavização excessiva e artefatos plásticos. Mantenha a granulação original em baixa intensidade." },
+    { cat: "qualidade", title: "Redução de ruído seletiva", text: "Remova o ruído digital predominantemente nas áreas de sombra e céu, preservando nitidez em bordas e no foco principal. Não aplique suavização em texturas de pele ou tecido." },
+    { cat: "qualidade", title: "Nitidez sem halos", text: "Aumente a nitidez percebida do assunto principal em primeiro plano sem introduzir halos ou contornos artificiais. Mantenha o desfoque de fundo (bokeh) intacto." },
+    { cat: "qualidade", title: "Reconstrução em baixa resolução", text: "Reconstrua detalhes plausíveis em áreas de baixa resolução ou compressão, mantendo consistência com a iluminação e a textura das áreas vizinhas nítidas." },
+    { cat: "qualidade", title: "Remoção de artefatos JPEG", text: "Elimine blocos de compressão e banding em áreas de gradiente suave, como céu e paredes lisas, sem borrar bordas definidas." },
+    { cat: "qualidade", title: "Nitidez para impressão grande", text: "Otimize a nitidez desta imagem para impressão em grande formato (A2 ou maior), reforçando bordas de médio contraste e preservando detalhes finos a 300 DPI." },
+
+    { cat: "luz", title: "Recuperar sombras", text: "Recupere detalhes em áreas de sombra sem clarear excessivamente o restante da imagem. Preserve o contraste natural e evite achatar os pretos." },
+    { cat: "luz", title: "Recuperar altas luzes estouradas", text: "Recupere textura em áreas superexpostas, como céu ou pele muito clara, reconstruindo gradações plausíveis sem criar bordas artificiais entre tons." },
+    { cat: "luz", title: "Equilibrar exposição desigual", text: "Equilibre a exposição entre o primeiro plano e o fundo, escurecendo levemente o céu e clareando o assunto principal, mantendo transição natural." },
+    { cat: "luz", title: "Luz suave de janela", text: "Reilumine o rosto do assunto com luz suave direcional, como se viesse de uma janela à esquerda, criando modelagem sutil sem sombras duras." },
+    { cat: "luz", title: "Corrigir contraluz", text: "Corrija uma foto tirada contra a luz, iluminando o assunto em primeiro plano sem estourar o céu ao fundo. Mantenha a silhueta natural do horizonte." },
+    { cat: "luz", title: "Golden hour sintético", text: "Adicione uma iluminação quente e direcional de fim de tarde, com tons dourados suaves entrando pela lateral, preservando a estrutura de luz original da cena." },
+
+    { cat: "cor", title: "Correção de balanço de branco", text: "Corrija o balanço de branco desta imagem para tons neutros, removendo dominante de cor amarela ou azulada sem alterar a saturação geral." },
+    { cat: "cor", title: "Teal and orange", text: "Aplique uma paleta de cores com tons de pele quentes (laranja) e sombras e fundo com tendência azul-esverdeada (teal), mantendo naturalidade nos tons de pele." },
+    { cat: "cor", title: "Restaurar cores desbotadas", text: "Restaure a saturação de cores de uma foto desbotada pelo tempo, reconstruindo tons realistas com base no contexto da cena, como céu azul, vegetação verde e pele natural." },
+    { cat: "cor", title: "Preto e branco dramático", text: "Converta para preto e branco com contraste elevado, preservando detalhes em altas luzes e sombras, com ênfase em textura e tons médios." },
+    { cat: "cor", title: "Vibração seletiva", text: "Aumente a vibração das cores de forma seletiva, priorizando verdes e azuis da paisagem, sem alterar significativamente os tons de pele." },
+    { cat: "cor", title: "Uniformizar tom de pele", text: "Uniformize o tom de pele do assunto, removendo manchas de cor causadas por iluminação mista, mantendo textura natural e sem efeito de pele plástica." },
+
+    { cat: "retrato", title: "Retoque de pele natural", text: "Suavize imperfeições temporárias da pele, como espinhas e vermelhidão, mantendo poros, textura e assimetrias naturais visíveis. Evite efeito de pele lisa artificial." },
+    { cat: "retrato", title: "Realce de olhos", text: "Aumente sutilmente o brilho e contraste dos olhos, realçando a íris e os reflexos de luz naturais, sem alterar a cor original." },
+    { cat: "retrato", title: "Correção de olheiras", text: "Reduza a intensidade de olheiras sob os olhos preservando a estrutura óssea e as sombras naturais do rosto." },
+    { cat: "retrato", title: "Dentes mais brancos, naturais", text: "Clareie levemente os dentes mantendo um tom realista, sem branqueamento excessivo que pareça artificial." },
+    { cat: "retrato", title: "Cabelo com mais definição", text: "Aumente a definição de fios individuais de cabelo nas áreas fora de foco, preservando o movimento e o volume natural." },
+    { cat: "retrato", title: "Remoção de reflexo em óculos", text: "Remova reflexos de luz nas lentes dos óculos, reconstruindo os olhos por trás de forma natural e consistente com o ângulo do rosto." },
+
+    { cat: "restauro", title: "Reparo de rasgos e dobras", text: "Repare rasgos, dobras e arranhões visíveis nesta fotografia antiga, reconstruindo as áreas danificadas de forma consistente com o entorno." },
+    { cat: "restauro", title: "Remoção de manchas de água", text: "Remova manchas amareladas de água e mofo, preservando os detalhes originais da imagem por baixo das manchas." },
+    { cat: "restauro", title: "Colorização de P&B", text: "Colorize esta fotografia em preto e branco com tons realistas de época, considerando o contexto histórico e os tipos de tecido, pele e ambiente." },
+    { cat: "restauro", title: "Corrigir descoloração por idade", text: "Corrija o desbotamento amarelado típico de fotos antigas, restaurando um balanço de cores neutro sem perder a atmosfera vintage." },
+    { cat: "restauro", title: "Reconstrução de rosto desfocado", text: "Reconstrua com plausibilidade os detalhes faciais em áreas borradas ou danificadas, mantendo a identidade e a expressão originais da pessoa." },
+    { cat: "restauro", title: "Nitidez em negativo escaneado", text: "Melhore a nitidez de uma foto escaneada de um negativo antigo, corrigindo poeira, granulação excessiva e leve desalinhamento de cor." },
+
+    { cat: "video", title: "Estabilização de câmera", text: "Estabilize este clipe removendo tremores de câmera de mão, preservando movimentos intencionais de panorâmica e zoom." },
+    { cat: "video", title: "Upscale de vídeo para 4K", text: "Aumente a resolução deste vídeo para 4K, preservando consistência temporal entre quadros e evitando cintilação de detalhes." },
+    { cat: "video", title: "Interpolação para slow motion", text: "Gere quadros intermediários para suavizar este clipe em câmera lenta, mantendo movimento natural sem artefatos de fantasma." },
+    { cat: "video", title: "Redução de ruído noturno", text: "Reduza o ruído em cenas noturnas de baixa luz, preservando detalhes em movimento e evitando borrão excessivo entre quadros." },
+    { cat: "video", title: "Corrigir cintilação (flicker)", text: "Corrija a cintilação de exposição entre quadros causada por luz artificial, estabilizando o brilho ao longo de toda a cena." },
+    { cat: "video", title: "Sincronizar cor entre cortes", text: "Uniformize a cor e o contraste entre diferentes cortes de vídeo filmados em condições de luz distintas, mantendo consistência ao longo da sequência." },
+
+    { cat: "grading", title: "Look cinematográfico clássico", text: "Aplique um grading de cor com contraste médio, pretos levemente elevados e leve dessaturação geral, imitando o visual de filme 35mm." },
+    { cat: "grading", title: "Atmosfera noir", text: "Crie um grading de alto contraste com sombras profundas e destaques controlados, tons dessaturados com leve toque azulado, no estilo cinema noir." },
+    { cat: "grading", title: "Look documental natural", text: "Aplique uma correção de cor sutil e natural, priorizando fidelidade de tons de pele e realismo, evitando estilização excessiva." },
+    { cat: "grading", title: "Vinheta para foco narrativo", text: "Adicione uma vinheta discreta nas bordas do quadro para direcionar o olhar ao centro da cena, sem escurecer elementos importantes da composição." },
+    { cat: "grading", title: "Grão de filme e halação", text: "Adicione grão de filme analógico sutil e halação nas altas luzes, preservando a nitidez do assunto principal." },
+    { cat: "grading", title: "Transição para golden hour", text: "Ajuste gradualmente a temperatura de cor da cena de neutro para tons quentes, simulando a passagem do meio-dia para o fim de tarde." },
+
+    { cat: "composicao", title: "Bokeh sintético", text: "Aplique desfoque progressivo no fundo mantendo o assunto principal em foco nítido, simulando a profundidade de campo de uma lente f/1.8." },
+    { cat: "composicao", title: "Remover elementos distrativos", text: "Remova elementos distrativos do fundo, como pessoas, objetos ou fios, reconstruindo a área de forma consistente com o ambiente ao redor." },
+    { cat: "composicao", title: "Substituição de céu", text: "Substitua um céu nublado e sem graça por um céu mais dramático, ajustando a iluminação do restante da cena para manter consistência." },
+    { cat: "composicao", title: "Recorte pela regra dos terços", text: "Recorte a imagem seguindo a regra dos terços, priorizando o assunto principal e removendo espaço morto nas bordas." },
+    { cat: "composicao", title: "Corrigir perspectiva arquitetônica", text: "Corrija a distorção de perspectiva em linhas verticais de prédios ou estruturas, mantendo as proporções naturais do restante da cena." },
+    { cat: "composicao", title: "Camadas para vídeo", text: "Separe o assunto principal do fundo neste clipe para permitir ajuste independente de cor e nitidez entre os dois planos." },
+
+    { cat: "realismo", title: "Textura de pele com poros", text: "Adicione textura de pele realista com poros visíveis, variações sutis de tom e microtextura natural, removendo a suavidade artificial (efeito 'airbrush') típica de imagens geradas por IA." },
+    { cat: "realismo", title: "Imperfeições sutis na pele", text: "Adicione imperfeições sutis e assimétricas à pele, como pequenas espinhas, marcas de acne cicatrizadas ou manchas leves, distribuídas de forma irregular, como ocorre naturalmente em uma pessoa real." },
+    { cat: "realismo", title: "Ruído de sensor de câmera", text: "Adicione um ruído de sensor sutil e granulado, típico de uma foto tirada com ISO 400 a 800 em câmera real, para quebrar a suavidade digital característica de imagens sintéticas." },
+    { cat: "realismo", title: "Assimetria facial natural", text: "Introduza pequenas assimetrias naturais no rosto, como diferenças sutis entre os dois lados, leve desalinhamento nos olhos ou variação de textura entre as bochechas, evitando a simetria perfeita típica de rostos gerados por IA." },
+    { cat: "realismo", title: "Imperfeições ópticas de lente", text: "Adicione leve aberração cromática nas bordas de alto contraste, uma vinheta sutil e pequena distorção de lente, simulando as imperfeições ópticas naturais de uma lente fotográfica real." },
+    { cat: "realismo", title: "Grão fotográfico irregular", text: "Adicione grão fotográfico sutil e irregular, semelhante ao de uma câmera real em condições de luz média, reduzindo a aparência 'lisa demais' e digital de imagens sintéticas." },
+    { cat: "realismo", title: "Iluminação imperfeita", text: "Ajuste a iluminação para incluir variações sutis e imperfeitas, como reflexos irregulares na pele, brilho desigual na testa e nariz, e sombras com bordas naturalmente suaves, evitando o brilho uniforme típico de renders de IA." },
+    { cat: "realismo", title: "Cabelo com fios soltos", text: "Adicione fios de cabelo soltos, frizz sutil e pequenas imperfeições no penteado, quebrando a perfeição artificial e o alinhamento excessivo de cabelos gerados por IA." },
+    { cat: "realismo", title: "Textura realista de tecido", text: "Adicione textura realista às roupas, como pequenas dobras, fiapos soltos e variações naturais no tecido, evitando a aparência lisa e homogênea de materiais gerados por IA." },
+    { cat: "realismo", title: "Foco levemente imperfeito", text: "Simule uma leve perda de nitidez seletiva, como em uma foto tirada com abertura ampla, deixando partes do rosto sutilmente fora do plano focal perfeito, imitando o comportamento óptico real de uma lente." },
+    { cat: "realismo", title: "Prompt combinado: converter em foto real", text: "Transforme esta imagem gerada por IA em algo com aparência de fotografia real: adicione textura de pele com poros e pequenas imperfeições assimétricas, ruído de sensor sutil, leve aberração cromática nas bordas, grão fotográfico irregular e iluminação levemente imperfeita. Evite simetria perfeita e suavidade artificial." },
+
+    { cat: "combinacao", title: "Iluminação consistente entre as duas pessoas", text: "Adicione uma pessoa ao lado do assunto principal, ajustando a iluminação, a direção da sombra e a temperatura de cor da nova pessoa para que sejam idênticas às da cena original, como se ambos tivessem sido fotografados juntos no mesmo momento." },
+    { cat: "combinacao", title: "Harmonizar paleta de roupas", text: "Vista a pessoa adicionada com roupas que combinem em paleta de cores e estilo com o restante da cena, sem repetir exatamente a mesma peça, criando uma composição visualmente coesa entre as duas pessoas." },
+    { cat: "combinacao", title: "Ajustar proporção e perspectiva", text: "Ajuste a altura, a proporção corporal e o ângulo de perspectiva da pessoa adicionada para que correspondam exatamente à distância da câmera e ao ponto de fuga da cena original." },
+    { cat: "combinacao", title: "Tom de pele reagindo à mesma luz", text: "Ajuste o tom de pele da pessoa adicionada para reagir à mesma fonte de luz da cena original, mantendo reflexos e sombras consistentes com o restante da composição." },
+    { cat: "combinacao", title: "Linguagem corporal natural entre duas pessoas", text: "Posicione a pessoa adicionada com uma pose e linguagem corporal que sugira proximidade e naturalidade em relação ao assunto principal, evitando rigidez artificial ou posicionamento genérico." },
+    { cat: "combinacao", title: "Grão e nitidez uniformes", text: "Uniformize o nível de grão, nitidez e resolução entre a pessoa adicionada e o assunto original, para que ambos pareçam capturados pela mesma câmera e lente, no mesmo instante." },
+    { cat: "combinacao", title: "Sombra de contato realista", text: "Adicione uma sombra de contato realista sob os pés da pessoa adicionada, consistente com a direção e a intensidade da luz da cena, integrando corretamente a figura ao chão." },
+    { cat: "combinacao", title: "Harmonização de estética visual", text: "Ajuste a estética visual da pessoa adicionada, como idade aparente, estilo de cabelo e expressão, para que combine de forma coerente e equilibrada com o assunto principal da imagem." },
+  ];
+
+  let activeCat = "todos";
+  let query = "";
+  let copiedIdx = null;
+
+  const chipsEl = document.getElementById("chips");
+  const gridEl = document.getElementById("grid");
+  const emptyEl = document.getElementById("emptyMsg");
+  const countEl = document.getElementById("countLine");
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("clearBtn");
+
+  const sprocketsHTML = '<div class="sprockets" aria-hidden="true">' + Array(14).fill('<span></span>').join('') + '</div>';
+
+  function catLabel(id) {
+    const c = CATEGORIES.find((c) => c.id === id);
+    return c ? c.label : "";
+  }
+
+  function renderChips() {
+    let html = `<button class="chip ${activeCat === "todos" ? "active" : ""}" data-cat="todos">Todos</button>`;
+    CATEGORIES.forEach((c) => {
+      html += `<button class="chip ${activeCat === c.id ? "active" : ""}" data-cat="${c.id}">${ICONS[c.id]}${c.label}</button>`;
+    });
+    chipsEl.innerHTML = html;
+    chipsEl.querySelectorAll(".chip").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeCat = btn.getAttribute("data-cat");
+        render();
+      });
+    });
+  }
+
+  function escapeHTML(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function render() {
+    const q = query.trim().toLowerCase();
+    const filtered = PROMPTS.filter((p) => {
+      const matchesCat = activeCat === "todos" || p.cat === activeCat;
+      const matchesQuery = !q || p.title.toLowerCase().includes(q) || p.text.toLowerCase().includes(q);
+      return matchesCat && matchesQuery;
+    });
+
+    countEl.textContent = `${filtered.length} prompt${filtered.length === 1 ? "" : "s"} encontrado${filtered.length === 1 ? "" : "s"}`;
+
+    if (filtered.length === 0) {
+      gridEl.style.display = "none";
+      emptyEl.style.display = "block";
+      return;
+    }
+
+    gridEl.style.display = "grid";
+    emptyEl.style.display = "none";
+
+    gridEl.innerHTML = filtered.map((p) => {
+      const realIdx = PROMPTS.indexOf(p);
+      const isCopied = copiedIdx === realIdx;
+      return `
+        <div class="card">
+          ${sprocketsHTML}
+          <div class="card-body">
+            <span class="card-cat">${catLabel(p.cat)}</span>
+            <h3 class="card-title">${escapeHTML(p.title)}</h3>
+            <p class="card-text">${escapeHTML(p.text)}</p>
+            <div class="card-actions">
+              <button class="copy-btn ${isCopied ? "copied" : ""}" data-idx="${realIdx}">
+                ${isCopied
+                  ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Copiado'
+                  : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copiar prompt'}
+              </button>
+            </div>
+          </div>
+          ${sprocketsHTML}
+        </div>
+      `;
+    }).join("");
+
+    gridEl.querySelectorAll(".copy-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.getAttribute("data-idx"), 10);
+        copyPrompt(PROMPTS[idx].text, idx);
+      });
+    });
+  }
+
+  function copyPrompt(text, idx) {
+    const done = () => {
+      copiedIdx = idx;
+      render();
+      setTimeout(() => {
+        if (copiedIdx === idx) {
+          copiedIdx = null;
+          render();
+        }
+      }, 1600);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(done);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      done();
+    }
+  }
+
+  searchInput.addEventListener("input", (e) => {
+    query = e.target.value;
+    clearBtn.style.display = query ? "flex" : "none";
+    render();
+  });
+
+  clearBtn.addEventListener("click", () => {
+    query = "";
+    searchInput.value = "";
+    clearBtn.style.display = "none";
+    render();
+  });
+
+  renderChips();
+  render();
+</script>
+</body>
+</html>
